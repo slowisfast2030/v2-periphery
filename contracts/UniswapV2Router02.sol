@@ -61,6 +61,8 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             }
         }
     }
+
+    // 支持两种erc20代币
     function addLiquidity(
         address tokenA,
         address tokenB,
@@ -71,12 +73,14 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         address to,
         uint deadline
     ) external virtual override ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
+        // amountA 和 amountB 是最终需要支付的数量
         (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
         TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
         TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
         liquidity = IUniswapV2Pair(pair).mint(to);
     }
+    // 支持erc20和eth
     function addLiquidityETH(
         address token,
         uint amountTokenDesired,
@@ -224,6 +228,20 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             );
         }
     }
+
+    /**
+    兑换接口则多达 9 个：
+
+    swapExactTokensForTokens：用 ERC20 兑换 ERC20，但支付的数量是指定的，而兑换回的数量则是未确定的
+    swapTokensForExactTokens：也是用 ERC20 兑换 ERC20，与上一个函数不同，指定的是兑换回的数量
+    swapExactETHForTokens：指定 ETH 数量兑换 ERC20
+    swapTokensForExactETH：用 ERC20 兑换成指定数量的 ETH
+    swapExactTokensForETH：用指定数量的 ERC20 兑换 ETH
+    swapETHForExactTokens：用 ETH 兑换指定数量的 ERC20
+    swapExactTokensForTokensSupportingFeeOnTransferTokens：指定数量的 ERC20 兑换 ERC20，支持转账时扣费
+    swapExactETHForTokensSupportingFeeOnTransferTokens：指定数量的 ETH 兑换 ERC20，支持转账时扣费
+    swapExactTokensForETHSupportingFeeOnTransferTokens：指定数量的 ERC20 兑换 ETH，支持转账时扣费
+     */
     function swapExactTokensForTokens(
         uint amountIn,
         uint amountOutMin,
