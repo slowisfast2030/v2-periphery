@@ -216,6 +216,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
 
     // **** SWAP ****
     // requires the initial amount to have already been sent to the first pair
+    // 遍历整个兑换路径，并对路径中每两个配对的token调用pair合约的兑换函数，实现底层的兑换处理
     function _swap(uint[] memory amounts, address[] memory path, address _to) internal virtual {
         for (uint i; i < path.length - 1; i++) {
             (address input, address output) = (path[i], path[i + 1]);
@@ -249,11 +250,18 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         address to,
         uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
+        // 计算出兑换数量
         amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
+        
+        // 判断是否超过滑动计算后的最小值
         require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+        
+        // 将支付的代币转到pair合约
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
+        
+        // 调用兑换的内部函数
         _swap(amounts, path, to);
     }
     function swapTokensForExactTokens(
