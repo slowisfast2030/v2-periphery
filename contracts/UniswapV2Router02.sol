@@ -9,6 +9,9 @@ import './libraries/SafeMath.sol';
 import './interfaces/IERC20.sol';
 import './interfaces/IWETH.sol';
 
+// 路由合约02版本，相比于01版本，主要增加了几个支持交税费用的函数
+// UniswapV2Router02 路由合约是与用户进行交互的入口，
+// 主要提供了添加流动性、移除流动性和兑换的系列接口，并提供了几个查询接口。
 contract UniswapV2Router02 is IUniswapV2Router02 {
     using SafeMath for uint;
 
