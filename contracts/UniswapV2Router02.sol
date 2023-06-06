@@ -99,6 +99,9 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         // 将生息代币发送给to，也就是LP用户地址
         liquidity = IUniswapV2Pair(pair).mint(to);
     }
+    // TransferHelper是一个library
+    // 这里还有一个library：SafeMath
+    // 这里给出使用library的两种方式
 
     // 支持erc20和eth
     function addLiquidityETH(
@@ -274,18 +277,20 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         address to,
         uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
-        // 计算出兑换数量
+        // 计算出兑换数量。因为是一个path，对兑换多次。
+        // amounts是一个数组，记录每次兑换的数量
         amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
         
-        // 判断是否超过滑动计算后的最小值
+        // 判断是否超过滑动计算后的最小值。
+        // amounts最后一个元素是兑换后的数量
         require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
         
-        // 将支付的代币转到pair合约
+        // 将支付的代币转到path中第一个兑换pair的合约
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
         
-        // 调用兑换的内部函数
+        // 调用兑换的内部函数，完成后续兑换
         _swap(amounts, path, to);
     }
     function swapTokensForExactTokens(
