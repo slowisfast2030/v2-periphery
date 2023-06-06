@@ -1,5 +1,12 @@
 pragma solidity =0.6.6;
 
+// 这里需要安装
+// npm install @uniswap/v2-core
+// npm install @uniswap/lib
+// 或者根据package.json，执行npm install
+// 特别注意，vscode需要打开v2-periphery文件夹，并修改.vscode/settings.json文件
+// 如果打开的文件夹不是v2-periphery，就会报错
+// v2-periphery和v2-code是两个独立的项目，分别用vscode打开
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 import '@uniswap/lib/contracts/libraries/TransferHelper.sol';
 
