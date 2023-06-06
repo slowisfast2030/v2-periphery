@@ -16,6 +16,9 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     using SafeMath for uint;
 
     address public immutable override factory;
+    // The WETH variable stores the address of the Wrapped Ether (WETH) contract. 
+    // WETH is an ERC20 token that represents Ether on the Ethereum network. 
+    // It is used in Uniswap to enable trading between Ether and other ERC20 tokens.
     address public immutable override WETH;
 
     modifier ensure(uint deadline) {
@@ -23,6 +26,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         _;
     }
 
+    // 思考：合约之间的部署顺序
     constructor(address _factory, address _WETH) public {
         factory = _factory;
         WETH = _WETH;
@@ -62,7 +66,9 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         }
     }
 
-    // 支持两种erc20代币
+    // 支持两种erc20代币。可以说，这个函数是真正的uniswap入口。外部用户调用这个函数添加流动性。
+    // This function allows anyone to join a Uniswap liquidity pool by depositing 
+    // an equivalent value of two tokens (tokenA and tokenB) into the associated exchange contract.
     function addLiquidity(
         address tokenA,
         address tokenB,
@@ -75,9 +81,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     ) external virtual override ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
         // amountA 和 amountB 是最终需要支付的数量
         (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
+        // 计算tokenA和tokenB组成的交易对合约的地址
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
+        // token是erc20合约地址，amount是数量，from是msg.sender，to是pair地址
         TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
         TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
+        // 将生息代币发送给to，也就是LP用户地址
         liquidity = IUniswapV2Pair(pair).mint(to);
     }
     // 支持erc20和eth
